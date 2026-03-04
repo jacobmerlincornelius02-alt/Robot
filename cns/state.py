@@ -45,6 +45,7 @@ class StateManager:
         self._velocity = Velocity()
         
         # Sensor readings
+        self._lidar_cm: Optional[float] = None
         self._ultrasonic_cm: Optional[float] = None
         self._ir1_detected: bool = False
         self._ir2_detected: bool = False
@@ -63,6 +64,11 @@ class StateManager:
         # Arrows state
         self._arrows: Dict[int, bool] = {1: False, 2: False, 3: False, 4: False}
     
+    def update_lidar(self, distance_cm: float) -> None:
+        """Update lidar sensor reading."""
+        with self._lock:
+            self._lidar_cm = distance_cm
+
     def update_ultrasonic(self, distance_cm: float) -> None:
         """Update ultrasonic sensor reading."""
         with self._lock:
@@ -113,6 +119,11 @@ class StateManager:
             if arrow_id in self._arrows:
                 self._arrows[arrow_id] = state
     
+    def get_lidar(self) -> Optional[float]:
+        """Get current lidar reading."""
+        with self._lock:
+            return self._lidar_cm
+
     def get_ultrasonic(self) -> Optional[float]:
         """Get current ultrasonic reading."""
         with self._lock:
@@ -160,6 +171,9 @@ class StateManager:
         with self._lock:
             return {
                 "timestamp": time.time(),
+                "lidar": {
+                    "distance_cm": self._lidar_cm
+                },
                 "ultrasonic": {
                     "distance_cm": self._ultrasonic_cm,
                     "history": [

@@ -101,6 +101,11 @@ class CommandExecutor:
         self._queue.put(cmd)
         self._state.set_pending_commands(self._queue.qsize())
         return {"status": "queued", "queue_size": self._queue.qsize()}
+
+    def resume(self) -> None:
+        """Resume execution after obstacle avoidance."""
+        self._abort_current.clear()
+        print("[Commands] Resuming command queue after obstacle avoidance.")
     
     def abort_all(self) -> None:
         """Abort current command and clear queue."""
@@ -190,6 +195,15 @@ class CommandExecutor:
                 break
             if not self._is_safe() and direction == "forward":
                 print("[Commands] Move stopped - obstacle detected")
+                # Back up and try to find a better route
+                self._motor_stop()
+                time.sleep(0.5)
+                self._motor_backward(speed)
+                time.sleep(1.0)
+                self._motor_stop()
+                print("[Commands] Backed up to avoid obstacle. Pausing before resuming.")
+                time.sleep(1.0)
+                self.resume()
                 break
             time.sleep(0.05)
         

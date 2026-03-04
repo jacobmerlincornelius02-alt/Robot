@@ -20,11 +20,11 @@ class SafetySystem:
         self,
         state: StateManager,
         stop_motors_callback: Callable[[], None],
-        read_ultrasonic_callback: Callable[[], Optional[float]]
+        read_lidar_callback: Callable[[], Optional[float]]
     ):
         self._state = state
         self._stop_motors = stop_motors_callback
-        self._read_ultrasonic = read_ultrasonic_callback
+        self._read_lidar = read_lidar_callback
         
         self._running = False
         self._thread: Optional[threading.Thread] = None
@@ -88,11 +88,11 @@ class SafetySystem:
                 time.sleep(sleep_time)
     
     def _check_collision(self) -> None:
-        """Check ultrasonic sensor for imminent collision."""
+        """Check lidar sensor for imminent collision."""
         try:
-            distance = self._read_ultrasonic()
+            distance = self._read_lidar()
             if distance is not None:
-                self._state.update_ultrasonic(distance)
+                self._state.update_lidar(distance)
                 
                 if distance < config.COLLISION_DISTANCE_CM:
                     if not self._state.is_collision_imminent():
@@ -106,7 +106,7 @@ class SafetySystem:
                 else:
                     self._state.set_collision_imminent(False)
         except Exception as e:
-            print(f"[Safety] Error reading ultrasonic: {e}")
+            print(f"[Safety] Error reading lidar: {e}")
     
     def _check_watchdog(self) -> None:
         """Check if brain has sent heartbeat recently."""
