@@ -45,3 +45,4 @@ Current hardware uses a Raspberry Pi, a MotorShield (https://github.com/sbcshop/
    requests.post("http://<robot-ip>:5000/move", json=payload)
    ```
 3. **CNS executes and manages safety automatically.**
+77ae7ebc77d8516a1a9c4ced2d628a916adce4e9
